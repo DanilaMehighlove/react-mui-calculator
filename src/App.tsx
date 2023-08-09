@@ -1,29 +1,51 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import './App.scss';
 import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
+import { Box } from '@mui/material';
+import { Theme, ThemeProvider, createTheme } from '@mui/material/styles';
+import { red } from '@mui/material/colors';
+import CssBaseline from '@mui/material/CssBaseline';
+import Calculator from './component/Calculator';
+import { useState } from 'react';
+
+const darkTheme = createTheme({
+  palette: {
+    primary: {
+      main: red['A400']
+    },
+    mode: 'dark'
+  }
+});
+
+const lightTheme = createTheme({
+  palette: {
+    mode: 'light'
+  }
+});
 
 function App() {
+  const [theme, setTheme] = useState<Theme>(darkTheme);
+
+  const changeMode = () => {
+    setTheme(theme.palette.mode === 'light' ? darkTheme : lightTheme);
+  }
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: 2,
+          height: 'calc(100% - 32px)'
+        }}>
+        <Calculator changeMode={changeMode} theme={theme} />
+      </Box>
+    </ThemeProvider>
   );
 }
 
