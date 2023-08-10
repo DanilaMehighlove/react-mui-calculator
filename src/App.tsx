@@ -7,7 +7,7 @@ import { Box } from '@mui/material';
 import { Theme, ThemeProvider, createTheme } from '@mui/material/styles';
 import { red } from '@mui/material/colors';
 import CssBaseline from '@mui/material/CssBaseline';
-import Calculator from './component/Calculator';
+import Tool from './component/Tool';
 import { useState } from 'react';
 
 const darkTheme = createTheme({
@@ -43,7 +43,7 @@ function App() {
           padding: 2,
           height: 'calc(100% - 32px)'
         }}>
-        <Calculator changeMode={changeMode} theme={theme} />
+        <Tool changeMode={changeMode} theme={theme} />
       </Box>
     </ThemeProvider>
   );

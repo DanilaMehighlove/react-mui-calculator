@@ -1,17 +1,7 @@
-import { Box, ToggleButtonGroup, ToggleButton, Button, IconButton } from '@mui/material';
-import { Theme, styled } from '@mui/material/styles';
-import MenuIcon from '@mui/icons-material/Menu';
-import DarkModeIcon from '@mui/icons-material/DarkMode';
-import LightModeIcon from '@mui/icons-material/LightMode';
-import { MouseEvent, useState } from 'react';
-import Grid from '@mui/material/Grid';
-
-type toolType = 'calculator' | 'converter';
-
-interface ICalculatorInputs {
-  changeMode: () => void,
-  theme: Theme
-}
+import { Box, TextField, Grid, styled, Button } from '@mui/material';
+import { ChangeEvent, useState, useEffect } from 'react';
+import { evaluate } from 'mathjs';
+import BackspaceIcon from '@mui/icons-material/Backspace';
 
 const CButton = styled(Button)({
   height: '4.5em',
@@ -23,76 +13,101 @@ const CButton = styled(Button)({
 
 const buttons = [
   '(', ')', '!', '/',
-  '7', '8', '9', 'X',
+  '7', '8', '9', '*',
   '4', '5', '6', '-',
   '1', '2', '3', '+',
-  'D', '0', 'R', '='
+  'C', '0', 'R', '='
 ];
 
-export default function Calculator({changeMode, theme}: ICalculatorInputs) {
-  const [tool, setTool] = useState<toolType>('calculator');
+const ModifiedTextField = styled(TextField)({
+  '& .MuiFormHelperText-root': {
+    textAlign: 'right'
+  }
+});
 
-  const handleToolChange = (
-    event: MouseEvent<HTMLElement>,
-    newTool: toolType
-  ) => {
-    setTool(newTool);
+export default function Calculator() {
+  const [inputValue, setInputValue] = useState('');
+  const [expressionResult, setExpressionResult] = useState(' ');
+
+  useEffect(() => {
+    try {
+      const result = evaluate(inputValue);
+      let helperText = '= ' + result;
+
+      if (result === undefined) {
+        helperText = ' ';
+      }
+
+      setExpressionResult(helperText);
+      
+    } catch(e) {
+      setExpressionResult(' ');
+    }
+  }, [inputValue]);
+
+  const handleButtonClick = (value: string) => {
+    switch(value) {
+      case 'C': return setInputValue('');
+      case 'R': return setInputValue(prev => prev.slice(0, prev.length - 1))
+      case '=': {
+        try {
+          const result = evaluate(inputValue) + '';
+          return setInputValue(result);
+        } catch(e) {
+          return setExpressionResult('Wrong expression');
+        }
+      }
+    }
+
+    setInputValue(prev => prev + value);
+  }
+
+  const handleInput = (event: ChangeEvent<HTMLInputElement>) => {
+    setInputValue(event.target.value);
   }
 
   return (
     <Box
       sx={{
         display: 'flex',
-        rowGap: 2,
         flexDirection: 'column',
-        alignItems: 'center',
-        width: 'min-content'
+        // rowGap: 2
       }}
     >
+      <ModifiedTextField
+        autoComplete='off'
+        value={inputValue}
+        onChange={handleInput}
+        fullWidth
+        variant="outlined"
+        helperText={expressionResult}
+      />
       <Box
         sx={{
-          display: 'flex',
-          columnGap: 1.5,
-          alignItems: 'center'
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr 1fr 1fr',
+          justifyContent: 'space-between'
         }}
-      >
-        <IconButton aria-label="history">
-          <MenuIcon />
-        </IconButton>
-        <ToggleButtonGroup
-          color="primary"
-          value={tool}
-          exclusive
-          onChange={handleToolChange}
-          aria-label="tool"
-        >
-          <ToggleButton value="calculator">calculator</ToggleButton>
-          <ToggleButton value="converter">converter</ToggleButton>
-        </ToggleButtonGroup>
-        <IconButton
-          aria-label={theme.palette.mode === 'light' ? 'light mode' : 'dark mode'}
-          onClick={() => changeMode()}
-        >
-          {
-            theme.palette.mode === 'light' ?
-            <LightModeIcon /> :
-            <DarkModeIcon />
-          }
-        </IconButton>
-      </Box>
-      <Grid
-        className='buttons'
-        container
-        spacing={1}
       >
         {
           buttons.map(button =>
-            <Grid item xs={3}>
-              <CButton key={button}>{button}</CButton>
-            </Grid>
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'center'
+              }}
+            >
+              {
+                button === 'R' ?
+                <CButton onClick={() => handleButtonClick(button)}>
+                  <BackspaceIcon />
+                </CButton> :
+                <CButton onClick={() => handleButtonClick(button)}>{button}</CButton>
+              }
+            </Box>
           )
         }
-      </Grid>
+      </Box>
     </Box>
-  )
+  );
 }
