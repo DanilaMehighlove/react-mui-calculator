@@ -1,7 +1,9 @@
-import { Box, TextField, Grid, styled, Button } from '@mui/material';
-import { ChangeEvent, useState, useEffect } from 'react';
-import { evaluate } from 'mathjs';
+import { Box, TextField, styled, Button } from '@mui/material';
+import { ChangeEvent, useState, useEffect, KeyboardEvent } from 'react';
+import { evaluate, re } from 'mathjs';
 import BackspaceIcon from '@mui/icons-material/Backspace';
+import { useAppDispatch } from '../store/hooks';
+import { addHistory } from '../store/features/historySlice';
 
 const CButton = styled(Button)({
   height: '4.5em',
@@ -28,10 +30,12 @@ const ModifiedTextField = styled(TextField)({
 export default function Calculator() {
   const [inputValue, setInputValue] = useState('');
   const [expressionResult, setExpressionResult] = useState(' ');
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
     try {
-      const result = evaluate(inputValue);
+      const rawResult = evaluate(inputValue);
+      const result = rawResult ? Math.round(rawResult * 1e10) / 1e10 : undefined;
       let helperText = '= ' + result;
 
       if (result === undefined) {
@@ -51,8 +55,10 @@ export default function Calculator() {
       case 'R': return setInputValue(prev => prev.slice(0, prev.length - 1))
       case '=': {
         try {
-          const result = evaluate(inputValue) + '';
-          return setInputValue(result);
+          const rawResult = evaluate(inputValue);
+          const result = rawResult ? Math.round(rawResult * 1e10) / 1e10 : undefined;
+          dispatch(addHistory(inputValue + ' = ' + result?.toString()));
+          return setInputValue(result ? result.toString() : '');
         } catch(e) {
           return setExpressionResult('Wrong expression');
         }
@@ -64,6 +70,13 @@ export default function Calculator() {
 
   const handleInput = (event: ChangeEvent<HTMLInputElement>) => {
     setInputValue(event.target.value);
+  }
+
+  const handleInputKey = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === 'Enter') {
+      handleButtonClick('=');
+      event.preventDefault();
+    }
   }
 
   return (
@@ -78,6 +91,7 @@ export default function Calculator() {
         autoComplete='off'
         value={inputValue}
         onChange={handleInput}
+        onKeyUp={handleInputKey}
         fullWidth
         variant="outlined"
         helperText={expressionResult}
@@ -92,6 +106,7 @@ export default function Calculator() {
         {
           buttons.map(button =>
             <Box
+              key={button}
               sx={{
                 display: 'flex',
                 justifyContent: 'center'

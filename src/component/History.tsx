@@ -1,6 +1,13 @@
-export default function History() {
+import { useAppSelector } from '../store/hooks';
 
+export default function History() {
+  const historyList = useAppSelector(state => state.history.list);
+  
   return (
-    <h1>History</h1>
-  )
+    <>
+      {
+        historyList.map(rec => <p key={rec.id}>{rec.text}</p>)
+      }
+    </>
+  );
 }
