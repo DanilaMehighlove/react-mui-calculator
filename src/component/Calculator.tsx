@@ -1,6 +1,6 @@
 import { Box, TextField, styled, Button } from '@mui/material';
 import { ChangeEvent, useState, useEffect, KeyboardEvent } from 'react';
-import { evaluate, re } from 'mathjs';
+import { evaluate } from 'mathjs';
 import BackspaceIcon from '@mui/icons-material/Backspace';
 import { useAppDispatch } from '../store/hooks';
 import { addHistory } from '../store/features/historySlice';
@@ -27,8 +27,12 @@ const ModifiedTextField = styled(TextField)({
   }
 });
 
-export default function Calculator() {
-  const [inputValue, setInputValue] = useState('');
+interface ICalculatorProps {
+  defaultInput?: string;
+}
+
+export default function Calculator({defaultInput}: ICalculatorProps) {
+  const [inputValue, setInputValue] = useState(defaultInput);
   const [expressionResult, setExpressionResult] = useState(' ');
   const dispatch = useAppDispatch();
 
@@ -57,7 +61,13 @@ export default function Calculator() {
         try {
           const rawResult = evaluate(inputValue);
           const result = rawResult ? Math.round(rawResult * 1e10) / 1e10 : undefined;
-          dispatch(addHistory(inputValue + ' = ' + result?.toString()));
+
+          dispatch(addHistory({
+            expression: inputValue,
+            result: result?.toString(),
+            type: 'calculator'
+          }));
+
           return setInputValue(result ? result.toString() : '');
         } catch(e) {
           return setExpressionResult('Wrong expression');
@@ -84,7 +94,6 @@ export default function Calculator() {
       sx={{
         display: 'flex',
         flexDirection: 'column',
-        // rowGap: 2
       }}
     >
       <ModifiedTextField

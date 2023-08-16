@@ -14,23 +14,30 @@ interface IToolInputs {
   theme: Theme;
 }
 
-const changeTools = (tool: toolType): JSX.Element => {
-  switch(tool) {
-    case 'calculator': return <Calculator />;
-    case 'converter': return <Converter />;
-    case 'history': return <History />;
-    default: return <></>;
-  }
-}
-
 export default function Tool({changeMode, theme}: IToolInputs) {
   const [tool, setTool] = useState<toolType>('calculator');
+  const [calcDefaultValue, setCalcDefaultValue] = useState('');
 
   const handleToolChange = (
     event: MouseEvent<HTMLElement>,
     newTool: toolType
   ) => {
+    setCalcDefaultValue('');
     setTool(newTool);
+  }
+
+  const setCalcDefault = (input: string) => {
+    setCalcDefaultValue(input);
+    setTool('calculator');
+  }
+
+  const changeTools = (tool: toolType): JSX.Element => {
+    switch(tool) {
+      case 'calculator': return <Calculator defaultInput={calcDefaultValue} />;
+      case 'converter': return <Converter />;
+      case 'history': return <History goCalc={setCalcDefault} />;
+      default: return <></>;
+    }
   }
 
   return (
