@@ -1,5 +1,4 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { RootState } from '..';
 
 type historyItemType = 'calculator' | 'conerter'
 
@@ -12,10 +11,12 @@ export interface IHistoryItem {
 
 interface IHistory {
   list: IHistoryItem[];
+  selectedHistory: IHistoryItem;
 };
 
 const initialState: IHistory = {
-  list: []
+  list: [],
+  selectedHistory: null
 };
 
 export const historySlice = createSlice({
@@ -39,10 +40,12 @@ export const historySlice = createSlice({
       const index = state.list.findIndex(item => item.id === action.payload);
       if (index === -1) return;
       state.list.splice(index, 1);
+    },
+    selectHistoryItem: (state, action: PayloadAction<IHistoryItem>) => {
+      state.selectedHistory = action.payload;
     }
   }
 });
 
-export const { addHistory, deleteHistory } = historySlice.actions;
-export const selectHistory = (state: RootState) => state.history.list;
+export const { addHistory, deleteHistory, selectHistoryItem } = historySlice.actions;
 export default historySlice.reducer;

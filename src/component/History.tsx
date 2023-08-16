@@ -6,7 +6,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { MouseEvent } from 'react';
 
 interface IHistoryProps {
-  goCalc?: (input: string) => void
+  goCalc?: (item: IHistoryItem) => void
 }
 
 export default function History({goCalc}: IHistoryProps) {
@@ -15,7 +15,7 @@ export default function History({goCalc}: IHistoryProps) {
 
   const handleListItemClick = (item: IHistoryItem) => {
     if (item.type === 'calculator') {
-      goCalc?.(item.expression);
+      goCalc?.(item);
     }
   }
 
